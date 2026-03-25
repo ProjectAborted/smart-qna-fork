@@ -3,10 +3,11 @@ name: Terraform Infrastructure
 on:
   push:
     branches: [main]
-    paths: [terraform/**]
+    paths: [terraform/**, .github/workflows/terraform.yml]
   pull_request:
     branches: [main]
-    paths: [terraform/**]
+    paths: [terraform/**, .github/workflows/terraform.yml]
+  workflow_dispatch:
 
 env:
   TF_WORKING_DIR: ./terraform
