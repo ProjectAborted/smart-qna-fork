@@ -32,3 +32,4 @@ app.include_router(tags.router,          prefix="/api/v1/tags",          tags=["
 app.include_router(notifications.router, prefix="/api/v1/notifications", tags=["Notifications"])
 app.include_router(attachments.router,   prefix="/api/v1/attachments",   tags=["Attachments"])
 app.include_router(admin.router,         prefix="/api/v1",               tags=["Admin"])
+
