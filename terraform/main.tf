@@ -18,9 +18,9 @@ terraform {
   #     --billing-mode PAY_PER_REQUEST \
   #     --region us-east-1
   backend "s3" {
-    bucket         = "smartqna-tfstate"
-    key            = "smartqna/terraform.tfstate"
-    region         = "us-west-1"
+    bucket       = "smartqna-tfstate"
+    key          = "smartqna/terraform.tfstate"
+    region       = "us-west-1"
     use_lockfile = true
     encrypt      = true
   }
