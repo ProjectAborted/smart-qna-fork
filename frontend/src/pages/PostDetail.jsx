@@ -103,6 +103,30 @@ export default function PostDetail() {
             <div className="flex flex-wrap gap-1.5 mt-4">
               {post.tags?.map((tag) => <TagBadge key={tag.tag_id} tag={tag} />)}
             </div>
+            {post.attachments?.length > 0 && (
+              <div className="mt-4">
+                <p className="text-xs font-medium text-gray-500 mb-2">Attachments</p>
+                <div className="flex flex-wrap gap-2">
+                  {post.attachments.map((att) =>
+                    att.content_type.startsWith("image/") ? (
+                      <a key={att.attachment_id} href={att.url} target="_blank" rel="noreferrer">
+                        <img src={att.url} alt={att.filename} className="h-24 w-24 object-cover rounded border border-gray-200 hover:opacity-80" />
+                      </a>
+                    ) : (
+                      <a
+                        key={att.attachment_id}
+                        href={att.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 rounded border border-gray-200 text-gray-700"
+                      >
+                        📎 {att.filename}
+                      </a>
+                    )
+                  )}
+                </div>
+              </div>
+            )}
             <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
               <div className="flex items-center gap-2 text-sm">
                 <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold">

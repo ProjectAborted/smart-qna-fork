@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from app.schemas.user import UserResponse
 from app.schemas.tag import TagBase
 from app.schemas.answer import AnswerResponse
+from app.schemas.attachment import AttachmentResponse
 from app.schemas.comment import CommentResponse
 
 
@@ -42,6 +43,7 @@ class PostResponse(PostSummary):
 class PostDetailResponse(PostResponse):
     answers: list[AnswerResponse] = []
     comments: list[CommentResponse] = []
+    attachments: list[AttachmentResponse] = []
     user_vote: str | None = None
 
 

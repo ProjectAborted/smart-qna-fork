@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     COGNITO_USER_POOL_ID: str = ""
     COGNITO_APP_CLIENT_ID: str = ""
     S3_BUCKET_ATTACHMENTS: str = ""
+    AWS_REGION: str = "us-east-1"
+    AWS_ACCESS_KEY_ID: str = ""
+    AWS_SECRET_ACCESS_KEY: str = ""
     SQS_NOTIFICATION_QUEUE_URL: str = ""
     NOTIFICATION_DELIVERY_MODE: str = "auto"  # auto | direct | sqs
     NOTIFICATION_API_URL: str = ""

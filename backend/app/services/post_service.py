@@ -6,6 +6,7 @@ from fastapi import HTTPException
 
 from app.models.post import Post
 from app.models.answer import Answer
+from app.models.attachment import Attachment
 from app.models.comment import Comment
 from app.models.tag import Tag
 from app.schemas.post import PostCreate, PostUpdate
@@ -23,6 +24,7 @@ async def get_post_with_relations(db: AsyncSession, post_id: uuid.UUID) -> Post:
             selectinload(Post.answers).selectinload(Answer.votes),
             selectinload(Post.comments).selectinload(Comment.author),
             selectinload(Post.votes),
+            selectinload(Post.attachments),
         )
         .where(Post.post_id == post_id)
     )
