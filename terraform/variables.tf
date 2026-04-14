@@ -106,3 +106,4 @@ variable "enable_notification_queue_trigger" {
   default     = false
 }
 
+

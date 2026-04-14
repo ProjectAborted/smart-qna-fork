@@ -33,9 +33,9 @@ provider "aws" {
 module "notification_worker" {
   source = "./modules/notification_worker"
 
-  project_name = var.app_name
   aws_region   = var.aws_region
-  environment  = "dev"
+  project_name = var.app_name
+  environment  = "prod"
 
   notification_queue_name           = var.notification_queue_name
   db_host                           = var.db_host
