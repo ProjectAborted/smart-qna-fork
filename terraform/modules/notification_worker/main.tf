@@ -3,6 +3,10 @@ locals {
   lambda_role_name     = "${var.project_name}-${var.environment}-notification-worker-role"
 }
 
+data "aws_caller_identity" "current" {}
+
+data "aws_region" "current" {}
+
 data "aws_sqs_queue" "notification" {
   name = var.notification_queue_name
 }
@@ -77,27 +81,6 @@ resource "aws_ecr_repository" "notification_worker" {
   }
 }
 
-resource "aws_ecr_lifecycle_policy" "notification_worker" {
-  repository = aws_ecr_repository.notification_worker.name
-
-  policy = jsonencode({
-    rules = [
-      {
-        rulePriority = 1
-        description  = "Keep only the last 10 images"
-        selection = {
-          tagStatus   = "any"
-          countType   = "imageCountMoreThan"
-          countNumber = 10
-        }
-        action = {
-          type = "expire"
-        }
-      }
-    ]
-  })
-}
-
 resource "aws_lambda_function" "notification_worker" {
   function_name = local.lambda_function_name
   role          = aws_iam_role.lambda_role.arn
@@ -120,8 +103,7 @@ resource "aws_lambda_function" "notification_worker" {
   depends_on = [
     aws_iam_role_policy_attachment.basic_lambda_logs,
     aws_iam_role_policy.sqs_access,
-    aws_iam_role_policy.ses_access,
-    aws_ecr_repository.notification_worker
+    aws_iam_role_policy.ses_access
   ]
 }
 

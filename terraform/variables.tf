@@ -107,9 +107,3 @@ variable "enable_notification_queue_trigger" {
 }
 
 
-
-variable "environment" {
-  description = "Deployment environment for the notification worker"
-  type        = string
-  default     = "prod"
-}
