@@ -30,6 +30,7 @@ jobs:
           VITE_COGNITO_REGION: us-east-1
           VITE_COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
           VITE_COGNITO_CLIENT_ID: ${{ secrets.COGNITO_APP_CLIENT_ID }}
+          VITE_NOTIFICATION_API_URL: ${{ secrets.NOTIFICATION_API_URL }}
 
       - uses: aws-actions/configure-aws-credentials@v4
         with:
