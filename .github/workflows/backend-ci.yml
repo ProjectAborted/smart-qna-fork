@@ -111,6 +111,7 @@ jobs:
           EC2_HOST: ${{ secrets.EC2_HOST_1 }}
           ECR_REPO: ${{ secrets.ECR_REPO }}
         run: |
+          ssh ec2-user@${EC2_HOST} "mkdir -p /home/ec2-user/smartqna"
           scp /tmp/smartqna.env ec2-user@${EC2_HOST}:/home/ec2-user/smartqna/.env-prod
           scp docker-compose.prod.yml ec2-user@${EC2_HOST}:/home/ec2-user/smartqna/docker-compose.prod.yml
 
@@ -137,6 +138,7 @@ jobs:
           EC2_HOST: ${{ secrets.EC2_HOST_2 }}
           ECR_REPO: ${{ secrets.ECR_REPO }}
         run: |
+          ssh ec2-user@${EC2_HOST} "mkdir -p /home/ec2-user/smartqna"
           scp /tmp/smartqna.env ec2-user@${EC2_HOST}:/home/ec2-user/smartqna/.env-prod
           scp docker-compose.prod.yml ec2-user@${EC2_HOST}:/home/ec2-user/smartqna/docker-compose.prod.yml
 
@@ -150,6 +152,7 @@ jobs:
             docker compose --env-file .env-prod -f docker-compose.prod.yml pull
             docker compose --env-file .env-prod -f docker-compose.prod.yml up -d --remove-orphans
           ENDSSH
+
 
 
 
