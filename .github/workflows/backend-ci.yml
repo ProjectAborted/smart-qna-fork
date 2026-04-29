@@ -68,7 +68,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-west-1
+          aws-region: us-east-1
 
       - uses: aws-actions/amazon-ecr-login@v2
 
@@ -91,7 +91,7 @@ jobs:
           COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
           COGNITO_APP_CLIENT_ID: ${{ secrets.COGNITO_APP_CLIENT_ID }}
           S3_BUCKET_ATTACHMENTS: ${{ secrets.S3_FRONTEND_BUCKET != '' && 'smartqna-attachments' || 'smartqna-attachments' }}
-          SQS_NOTIFICATION_QUEUE_URL: ${{ secrets.SQS_QUEUE_URL }}
+          SQS_NOTIFICATION_QUEUE_URL: ${{ secrets.SQS_NOTIFICATION_QUEUE_URL }}
         run: |
           cat > /tmp/smartqna.env << EOF
           ECR_REPO=${ECR_REPO}
@@ -110,7 +110,7 @@ jobs:
           EC2_HOST: ${{ secrets.EC2_HOST_1 }}
           ECR_REPO: ${{ secrets.ECR_REPO }}
         run: |
-          scp /tmp/smartqna.env ec2-user@${EC2_HOST}:/home/ec2-user/smartqna/.env
+          scp /tmp/smartqna.env ec2-user@${EC2_HOST}:/home/ec2-user/smartqna/.env-prod
           scp docker-compose.prod.yml ec2-user@${EC2_HOST}:/home/ec2-user/smartqna/docker-compose.prod.yml
 
           ssh ec2-user@${EC2_HOST} bash -s << 'ENDSSH'
@@ -118,15 +118,15 @@ jobs:
             cd /home/ec2-user/smartqna
 
             # Pull latest image from ECR (instance role grants ECR read access)
-            aws ecr get-login-password --region us-west-1 \
-              | docker login --username AWS --password-stdin $(grep ECR_REPO .env | cut -d= -f2)
+            aws ecr get-login-password --region us-east-1 \
+              | docker login --username AWS --password-stdin $(grep ECR_REPO .env-prod | cut -d= -f2)
 
-            docker compose --env-file .env -f docker-compose.prod.yml pull
-            docker compose --env-file .env -f docker-compose.prod.yml up -d --remove-orphans
+            docker compose --env-file .env-prod -f docker-compose.prod.yml pull
+            docker compose --env-file .env-prod -f docker-compose.prod.yml up -d --remove-orphans
 
             # Run migrations once (only on EC2 #1)
             sleep 5
-            docker compose --env-file .env -f docker-compose.prod.yml exec -T backend \
+            docker compose --env-file .env-prod -f docker-compose.prod.yml exec -T backend \
               alembic upgrade head
           ENDSSH
 
@@ -136,16 +136,17 @@ jobs:
           EC2_HOST: ${{ secrets.EC2_HOST_2 }}
           ECR_REPO: ${{ secrets.ECR_REPO }}
         run: |
-          scp /tmp/smartqna.env ec2-user@${EC2_HOST}:/home/ec2-user/smartqna/.env
+          scp /tmp/smartqna.env ec2-user@${EC2_HOST}:/home/ec2-user/smartqna/.env-prod
           scp docker-compose.prod.yml ec2-user@${EC2_HOST}:/home/ec2-user/smartqna/docker-compose.prod.yml
 
           ssh ec2-user@${EC2_HOST} bash -s << 'ENDSSH'
             set -e
             cd /home/ec2-user/smartqna
 
-            aws ecr get-login-password --region us-west-1 \
-              | docker login --username AWS --password-stdin $(grep ECR_REPO .env | cut -d= -f2)
+            aws ecr get-login-password --region us-east-1 \
+              | docker login --username AWS --password-stdin $(grep ECR_REPO .env-prod | cut -d= -f2)
 
-            docker compose --env-file .env -f docker-compose.prod.yml pull
-            docker compose --env-file .env -f docker-compose.prod.yml up -d --remove-orphans
+            docker compose --env-file .env-prod -f docker-compose.prod.yml pull
+            docker compose --env-file .env-prod -f docker-compose.prod.yml up -d --remove-orphans
           ENDSSH
+
