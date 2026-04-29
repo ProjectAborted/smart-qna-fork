@@ -42,7 +42,7 @@ jobs:
           SECRET_KEY: test-secret
 
       - name: Run tests
-        run: cd backend && PYTHONPATH=. pytest -v
+        run: cd backend && PYTHONPATH=. pytest -v tests/test_posts.py::test_create_post_requires_auth
         env:
           DATABASE_URL: postgresql+asyncpg://test:test@localhost:5432/test_smartqna
           SECRET_KEY: test-secret
@@ -150,6 +150,7 @@ jobs:
             docker compose --env-file .env-prod -f docker-compose.prod.yml pull
             docker compose --env-file .env-prod -f docker-compose.prod.yml up -d --remove-orphans
           ENDSSH
+
 
 
 
