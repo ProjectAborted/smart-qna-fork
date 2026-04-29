@@ -43,15 +43,22 @@ async def client(db):
 
 
 @pytest_asyncio.fixture
-async def auth_headers(client):
-    await client.post("/api/v1/auth/register", json={
-        "email": "test@example.com",
-        "display_name": "Test User",
-        "password": "testpassword123",
-    })
-    resp = await client.post("/api/v1/auth/login", json={
-        "email": "test@example.com",
-        "password": "testpassword123",
-    })
-    token = resp.json()["access_token"]
-    return {"Authorization": f"Bearer {token}"}
+async def auth_headers(client, db):
+    from app.models.user import User
+    from app.core.dependencies import get_current_user
+
+    user = User(
+        cognito_sub="test-sub",
+        email="test@example.com",
+        display_name="Test User",
+    )
+    db.add(user)
+    await db.commit()
+    await db.refresh(user)
+
+    async def override_get_current_user():
+        return user
+
+    app.dependency_overrides[get_current_user] = override_get_current_user
+
+    return {"Authorization": "Bearer fake-token"}
