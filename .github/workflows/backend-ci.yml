@@ -123,12 +123,12 @@ jobs:
             aws ecr get-login-password --region us-west-1 \
               | docker login --username AWS --password-stdin $(grep ECR_REPO .env-prod | cut -d= -f2)
 
-            docker compose --env-file .env-prod -f docker-compose.prod.yml pull
-            docker compose --env-file .env-prod -f docker-compose.prod.yml up -d --remove-orphans
+            docker-compose --env-file .env-prod -f docker-compose.prod.yml pull
+            docker-compose --env-file .env-prod -f docker-compose.prod.yml up -d --remove-orphans
 
             # Run migrations once (only on EC2 #1)
             sleep 5
-            docker compose --env-file .env-prod -f docker-compose.prod.yml exec -T backend \
+            docker-compose --env-file .env-prod -f docker-compose.prod.yml exec -T backend \
               alembic upgrade head
           ENDSSH
 
@@ -149,9 +149,10 @@ jobs:
             aws ecr get-login-password --region us-west-1 \
               | docker login --username AWS --password-stdin $(grep ECR_REPO .env-prod | cut -d= -f2)
 
-            docker compose --env-file .env-prod -f docker-compose.prod.yml pull
-            docker compose --env-file .env-prod -f docker-compose.prod.yml up -d --remove-orphans
+            docker-compose --env-file .env-prod -f docker-compose.prod.yml pull
+            docker-compose --env-file .env-prod -f docker-compose.prod.yml up -d --remove-orphans
           ENDSSH
+
 
 
 
