@@ -15,7 +15,7 @@ resource "aws_sqs_queue" "dead_letter" {
 }
 
 resource "aws_sqs_queue" "events" {
-  name = "${local.prefix}-events"
+  name                       = "${local.prefix}-events"
   visibility_timeout_seconds = 120
 
   redrive_policy = jsonencode({
