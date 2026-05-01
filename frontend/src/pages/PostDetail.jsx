@@ -1,6 +1,6 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
-import { usePost, useVotePost, useVoteAnswer, useAcceptAnswer } from "../hooks/usePosts.js";
+import { usePost, useVotePost, useVoteAnswer, useAcceptAnswer, usePinAnswer } from "../hooks/usePosts.js";
 import { useAuth } from "../hooks/useAuth.js";
 import VoteButton from "../components/VoteButton.jsx";
 import TagBadge from "../components/TagBadge.jsx";
@@ -18,7 +18,7 @@ const STATUS_COLORS = {
 
 export default function PostDetail() {
   const { postId } = useParams();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -26,6 +26,7 @@ export default function PostDetail() {
   const { mutate: votePost, isPending: votingPost } = useVotePost();
   const { mutate: voteAnswer, isPending: votingAnswer } = useVoteAnswer();
   const { mutate: acceptAnswer } = useAcceptAnswer();
+  const { mutate: pinAnswer } = usePinAnswer();
 
   const { mutate: deletePost } = useMutation({
     mutationFn: () => api.delete(`/posts/${postId}`),
@@ -67,8 +68,8 @@ export default function PostDetail() {
   }
 
   const isAuthor = user?.user_id === post.author_id;
-  const isMod = user?.role === "TA" || user?.role === "ADMIN";
-  const isAdmin = user?.role === "ADMIN";
+  const isMod = role === "TA" || role === "ADMIN";
+  const isAdmin = role === "ADMIN";
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -168,10 +169,10 @@ export default function PostDetail() {
       </h2>
 
       <div className="space-y-4 mb-6">
-        {post.answers?.sort((a, b) => b.is_accepted - a.is_accepted || b.vote_count - a.vote_count).map((answer) => (
+        {post.answers?.sort((a, b) => b.is_pinned - a.is_pinned || b.is_accepted - a.is_accepted || b.vote_count - a.vote_count).map((answer) => (
           <div
             key={answer.answer_id}
-            className={`card p-6 ${answer.is_accepted ? "border-l-4 border-l-green-500 bg-green-50/30" : ""}`}
+            className={`card p-6 ${answer.is_pinned ? "border-l-4 border-l-blue-500 bg-blue-50/20" : answer.is_accepted ? "border-l-4 border-l-green-500 bg-green-50/30" : ""}`}
           >
             <div className="flex gap-4">
               <div className="flex flex-col items-center gap-1">
@@ -182,6 +183,11 @@ export default function PostDetail() {
                   onDownvote={() => voteAnswer({ answerId: answer.answer_id, postId, type: "DOWN" })}
                   disabled={votingAnswer}
                 />
+                {answer.is_pinned && (
+                  <div className="text-blue-500 mt-1" title="Pinned by instructor">
+                    📌
+                  </div>
+                )}
                 {answer.is_accepted && (
                   <div className="text-green-600 mt-1" title="Accepted answer">
                     <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
@@ -217,6 +223,18 @@ export default function PostDetail() {
                       {formatDistanceToNow(new Date(answer.created_at), { addSuffix: true })}
                     </span>
                   </div>
+                  {isMod && (
+                    <button
+                      onClick={() => pinAnswer(answer.answer_id, {
+                        onSuccess: () => toast.success(answer.is_pinned ? "Answer unpinned" : "Answer pinned"),
+                        onError: () => toast.error("Failed to pin answer"),
+                      })}
+                      className="text-xs text-gray-400 hover:text-blue-600"
+                      title={answer.is_pinned ? "Unpin answer" : "Pin answer"}
+                    >
+                      {answer.is_pinned ? "Unpin" : "📌 Pin"}
+                    </button>
+                  )}
                 </div>
                 <CommentThread comments={answer.comments} answerId={answer.answer_id} />
               </div>

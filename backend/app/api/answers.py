@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from app.database import get_db
-from app.core.dependencies import get_current_user, require_role
+from app.core.dependencies import get_current_user, get_current_user_with_claims, require_role
 from app.models.user import User
 from app.models.answer import Answer
 from app.models.comment import Comment
@@ -111,16 +111,34 @@ async def accept_answer_endpoint(
     return await _load_answer(db, answer_id)
 
 
-@router.delete("/answers/{answer_id}", status_code=204)
-async def delete_answer(
+@router.patch("/answers/{answer_id}/pin", response_model=AnswerResponse)
+async def pin_answer(
     answer_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_role("TA", "ADMIN")),
 ):
     answer = await db.get(Answer, answer_id)
     if not answer:
         raise HTTPException(status_code=404, detail="Answer not found")
-    if answer.author_id != current_user.user_id and current_user.role != "ADMIN":
+
+    answer.is_pinned = not answer.is_pinned
+    await db.flush()
+    return await _load_answer(db, answer_id)
+
+
+@router.delete("/answers/{answer_id}", status_code=204)
+async def delete_answer(
+    answer_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    user_and_claims: tuple[User, dict] = Depends(get_current_user_with_claims),
+):
+    current_user, claims = user_and_claims
+    answer = await db.get(Answer, answer_id)
+    if not answer:
+        raise HTTPException(status_code=404, detail="Answer not found")
+    user_groups = claims.get("cognito:groups", [])
+    is_privileged = any(g in user_groups for g in ("TA", "ADMIN"))
+    if answer.author_id != current_user.user_id and not is_privileged:
         raise HTTPException(status_code=403, detail="Not authorized")
 
     post = await db.get(Post, answer.post_id)

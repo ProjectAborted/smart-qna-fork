@@ -66,3 +66,12 @@ export function useAcceptAnswer() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["post"] }),
   });
 }
+
+export function usePinAnswer() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (answerId) =>
+      api.patch(`/answers/${answerId}/pin`).then((r) => r.data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["post"] }),
+  });
+}

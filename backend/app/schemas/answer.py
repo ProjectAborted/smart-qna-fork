@@ -19,6 +19,7 @@ class AnswerResponse(BaseModel):
     author_id: uuid.UUID
     body: str
     is_accepted: bool
+    is_pinned: bool
     vote_count: int
     created_at: datetime
     updated_at: datetime

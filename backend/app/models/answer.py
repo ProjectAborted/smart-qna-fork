@@ -13,6 +13,7 @@ class Answer(Base):
     author_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.user_id"), nullable=False)
     body: Mapped[str] = mapped_column(Text, nullable=False)
     is_accepted: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_pinned: Mapped[bool] = mapped_column(Boolean, default=False)
     vote_count: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
