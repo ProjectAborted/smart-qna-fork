@@ -26,28 +26,53 @@ export default function CommentThread({ comments, postId, answerId }) {
     onError: (err) => toast.error(err.response?.data?.detail || "Failed to add comment"),
   });
 
+    const { mutate: deleteComment } = useMutation({
+    mutationFn: (commentId) => api.delete(`/comments/${commentId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["post"] });
+      toast.success("Comment deleted");
+    },
+    onError: (err) => toast.error(err.response?.data?.detail || "Failed to delete comment"),
+  });
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!newComment.trim()) return;
     mutate(newComment.trim());
   };
 
+const isMod = role === "TA" || role === "ADMIN";
+
   return (
     <div className="mt-3 border-t border-gray-100 pt-3">
-      {comments?.map((comment) => (
-        <div key={comment.comment_id} className="flex gap-2 py-1.5 text-sm">
-          <div className="w-5 h-5 rounded-full bg-gray-400 flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5">
-            {comment.author?.display_name[0]?.toUpperCase()}
+      {comments?.map((comment) => {
+        const isOwnComment = user?.user_id === comment.author_id;
+        const canDelete = isOwnComment || isMod;
+
+        return (
+          <div key={comment.comment_id} className="flex gap-2 py-1.5 text-sm group">
+            <div className="w-5 h-5 rounded-full bg-gray-400 flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5">
+              {comment.author?.display_name[0]?.toUpperCase()}
+            </div>
+            <div className="flex-1">
+              <span className="text-gray-700">{comment.body}</span>
+              <span className="text-gray-400 text-xs ml-2">
+                — {comment.author?.display_name},{" "}
+                {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
+              </span>
+              {canDelete && (
+                <button
+                  onClick={() => deleteComment(comment.comment_id)}
+                  className="ml-2 text-xs text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                  title="Delete comment"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
           </div>
-          <div>
-            <span className="text-gray-700">{comment.body}</span>
-            <span className="text-gray-400 text-xs ml-2">
-              — {comment.author?.display_name},{" "}
-              {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
-            </span>
-          </div>
-        </div>
-      ))}
+        );
+      })}
 
       {user && (
         showForm ? (

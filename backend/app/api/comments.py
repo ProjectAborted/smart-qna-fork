@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from app.database import get_db
-from app.core.dependencies import get_current_user
+from app.core.dependencies import get_current_user, get_current_user_with_claims
 from app.models.user import User
 from app.models.comment import Comment
 from app.models.post import Post
@@ -86,12 +86,16 @@ async def comment_on_answer(
 async def delete_comment(
     comment_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    user_and_claims: tuple[User, dict] = Depends(get_current_user_with_claims),
 ):
+    current_user, claims = user_and_claims
     comment = await db.get(Comment, comment_id)
     if not comment:
         raise HTTPException(status_code=404, detail="Comment not found")
-    if comment.author_id != current_user.user_id and current_user.role != "ADMIN":
+
+    user_groups = claims.get("cognito:groups", [])
+    is_privileged = any(g in user_groups for g in ("TA", "ADMIN"))
+    if comment.author_id != current_user.user_id and not is_privileged:
         raise HTTPException(status_code=403, detail="Not authorized")
 
     await db.delete(comment)
