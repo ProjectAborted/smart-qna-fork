@@ -62,9 +62,11 @@ const isMod = role === "TA" || role === "ADMIN";
               </span>
               {canDelete && (
                 <button
+                  type="button"
                   onClick={() => deleteComment(comment.comment_id)}
-                  className="ml-2 text-xs text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="ml-2 text-xs text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100 transition-opacity"
                   title="Delete comment"
+                  aria-label="Delete comment"
                 >
                   ✕
                 </button>
